@@ -6,13 +6,12 @@ local inspect = require "lib.inspect"
 
 local image, animation
 
-function love.load()
-    -- Grab window size
-    windowWidth  = love.graphics.getWidth()
-    windowHeight = love.graphics.getHeight()
+-- Enabling debug mode
+local debug = true
 
+function love.load()
     -- Set world meter size (in pixels)
-    love.physics.setMeter(70)
+    love.physics.setMeter(48)
 
     -- Load a map exported to Lua from Tiled
     map = sti("assets/tilesets/map.lua", { "box2d" })
@@ -20,7 +19,7 @@ function love.load()
     -- Prepare physics world with horizontal and vertical gravity
     world = love.physics.newWorld(0, 0)
 
-    -- construct characteranimations
+    -- construct character animations
     image = love.graphics.newImage("assets/images/sprites2.png")
     local idle = anim8.newGrid(16, 16, image:getWidth(), image:getHeight())
     animation = anim8.newAnimation(idle('1-3',1), 0.5)
@@ -30,7 +29,7 @@ function love.load()
     world:setCallbacks(beginContact)
 
     -- Create a Custom Layer
-    map:addCustomLayer("Sprite Layer", 2)
+    map:addCustomLayer("Sprite Layer", 4)
 
     -- Add data to Custom Layer
     --image = love.graphics.newImage("assets/images/sprite.png")
@@ -54,7 +53,7 @@ function love.load()
     print(inspect(playerObj))
 
     player = spriteLayer.sprites.player
-    player.body = love.physics.newBody(world, playerObj.x + 8, playerObj.y + 8, 'dynamic')
+    player.body = love.physics.newBody(world, playerObj.x, playerObj.y, 'dynamic')
     player.body:setLinearDamping(10)
     player.body:setFixedRotation(true)
 
@@ -78,21 +77,21 @@ function love.load()
 end
 
 function love.update(dt)
-    world:update(dt)
+
     local down = love.keyboard.isDown
   
     local x, y= 0, 0
     local speed = 48
-
-    if down("z","up")     then y = y - speed end
+    
+    if down("z","up") and player.y > 8    then y = y - speed end
     if down("s","down")     then y = y + speed end
-    if down("q", "left")     then x = x - speed end
+    if down("q", "left") and player.x > 8    then x = x - speed end
     if down("d", "right")    then x = x + speed end
     player.body:applyForce(x, y)
-    player.x = player.body:getX() - 8 / 2
-    player.y = player.body:getY() - 8 /2
+    player.x = player.body:getX() - 4
+    player.y = player.body:getY() - 4
 
-    player.x = player.x + (speed * dt)
+    -- updates routines
     animation:update(dt)
     map:update(dt)
     world:update(dt)
@@ -119,14 +118,17 @@ function love.draw()
     -- Draw the map and all objects within
     map:draw()
 
-    -- Draw Collision Map (useful for debugging)
-    love.graphics.setColor(255, 0, 0, 255)
-    map:box2d_draw()
-
-    -- Draw character lines
-    love.graphics.polygon("line", player.body:getWorldPoints(player.shape:getPoints()))
---    love.graphics.pop()
-
-    -- Reset color
-    love.graphics.setColor(255, 255, 255, 255)
+    if debug then
+      -- Draw Collision Map
+      love.graphics.setColor(255, 0, 0, 255)
+      map:box2d_draw()
+      love.graphics.polygon("line", player.body:getWorldPoints(player.shape:getPoints()))
+      
+      -- player debug
+      love.graphics.setColor(255, 255, 0, 255)
+      love.graphics.setPointSize(5)
+      love.graphics.points(math.floor(player.x), math.floor(player.y))
+      love.graphics.setColor(255, 255, 255, 255)
+      love.graphics.print(math.floor(player.x)..','..math.floor(player.y), player.x-16, player.y-16)
+    end
 end
