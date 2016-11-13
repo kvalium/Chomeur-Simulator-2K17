@@ -19,10 +19,9 @@ return {
       tileheight = 16,
       spacing = 1,
       margin = 0,
-      image = "roguelikeCity_magenta.png",
+      image = "roguelikeCity.png",
       imagewidth = 628,
       imageheight = 475,
-      transparentcolor = "#000000",
       tileoffset = {
         x = 0,
         y = 0

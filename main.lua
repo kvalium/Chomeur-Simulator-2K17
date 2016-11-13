@@ -4,6 +4,8 @@ local sti = require "lib.sti"
 local anim8 = require "lib.anim8"
 local inspect = require "lib.inspect"
 
+local image, animation
+
 function love.load()
     -- Grab window size
     windowWidth  = love.graphics.getWidth()
@@ -18,6 +20,11 @@ function love.load()
     -- Prepare physics world with horizontal and vertical gravity
     world = love.physics.newWorld(0, 0)
 
+    -- construct characteranimations
+    image = love.graphics.newImage("assets/images/sprites2.png")
+    local idle = anim8.newGrid(16, 16, image:getWidth(), image:getHeight())
+    animation = anim8.newAnimation(idle('1-3',1), 0.5)
+
     -- Prepare collision objects
     map:box2d_init(world)
     world:setCallbacks(beginContact)
@@ -26,11 +33,11 @@ function love.load()
     map:addCustomLayer("Sprite Layer", 2)
 
     -- Add data to Custom Layer
-    image = love.graphics.newImage("assets/images/sprite.png")
+    --image = love.graphics.newImage("assets/images/sprite.png")
     local spriteLayer = map.layers["Sprite Layer"]
     spriteLayer.sprites = {
         player = {
-            image = love.graphics.newImage("assets/images/sprite.png"),
+            image = love.graphics.newImage("assets/images/sprites2.png"),
             x = 0,
             y = 0,
             xvel = 0,
@@ -38,8 +45,18 @@ function love.load()
         }
     }
 
+    -- Get player spawn object
+    local playerObj
+    for i, object in ipairs(map.objects) do
+        if object.name == "Player" then
+            playerObj = object
+            break
+        end
+    end
+
+    print(inspectplayerObj))
     player = spriteLayer.sprites.player
-    player.body = love.physics.newBody(world, player.x + player.image:getWidth()/2, player.y + player.image:getHeight()/2, 'dynamic')
+    player.body = love.physics.newBody(world, player.x + 120, player.y + 8, 'dynamic')
     player.body:setLinearDamping(10)
     player.body:setFixedRotation(true)
 
@@ -57,7 +74,7 @@ function love.load()
             local x = math.floor(sprite.x)
             local y = math.floor(sprite.y)
             local r = sprite.r
-            love.graphics.draw(sprite.image, x, y, r)
+            animation:draw(sprite.image, x, y)
         end
     end
 end
@@ -74,10 +91,11 @@ function love.update(dt)
     if down("q", "left")     then x = x - speed end
     if down("d", "right")    then x = x + speed end
     player.body:applyForce(x, y)
-    player.x = player.body:getX() - player.image:getWidth() / 2
-    player.y = player.body:getY() - player.image:getHeight()/2
+    player.x = player.body:getX() - 8 / 2
+    player.y = player.body:getY() - 8 /2
 
     player.x = player.x + (speed * dt)
+    animation:update(dt)
     map:update(dt)
     world:update(dt)
 end
