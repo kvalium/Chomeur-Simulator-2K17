@@ -39,28 +39,26 @@ function love.load()
         player = {
             image = love.graphics.newImage("assets/images/sprites2.png"),
             x = 0,
-            y = 0,
-            xvel = 0,
-            yvel = 0
+            y = 0
         }
     }
 
-    -- Get player spawn object
+    -- Get player spawn object from Tiled
     local playerObj
-    for i, object in ipairs(map.objects) do
+    for k, object in pairs(map.objects) do
         if object.name == "Player" then
             playerObj = object
             break
         end
     end
+    print(inspect(playerObj))
 
-    print(inspectplayerObj))
     player = spriteLayer.sprites.player
-    player.body = love.physics.newBody(world, player.x + 120, player.y + 8, 'dynamic')
+    player.body = love.physics.newBody(world, playerObj.x + 8, playerObj.y + 8, 'dynamic')
     player.body:setLinearDamping(10)
     player.body:setFixedRotation(true)
 
-    player.shape = love.physics.newRectangleShape(16, 16)
+    player.shape = love.physics.newRectangleShape(14, 14)
     player.fixture = love.physics.newFixture(player.body, player.shape)
 
     -- Update callback for Custom Layer
@@ -74,7 +72,7 @@ function love.load()
             local x = math.floor(sprite.x)
             local y = math.floor(sprite.y)
             local r = sprite.r
-            animation:draw(sprite.image, x, y)
+            animation:draw(sprite.image, x - 3, y - 3)
         end
     end
 end
