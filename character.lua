@@ -1,8 +1,31 @@
 Object  = require "lib.classic"
 
-BadGuy = Object:extend()
+Character = Object:extend()
 
-function BadGuy:new(x, y)
+-- constructor
+
+function Character:new(x, y, sprite)
     self.x = x or 0
     self.y = y or 0
+    self.sprite = love.graphics.newImage(sprite)
 end
+
+-- draw the Character 
+function Character:draw()
+  return {
+      image = self.sprite,
+      x = self.x,
+      y = self.y
+  }
+end
+
+
+-- GETTERS & SETTERS
+
+function Character:getX() return self.x end
+function Character:setX(x) self.x = x end
+
+function Character:getY() return self.y end
+function Character:setY() self.y = y end
+
+function Character:getSprite() return self.sprite end

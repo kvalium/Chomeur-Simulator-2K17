@@ -1,28 +1,38 @@
--- This example uses the default box2d (love.physics) plugin!!
+local System = require 'lib.knife.system'
+
+local updateMotion = System(
+    { 'position', 'velocity' },
+    function (p, v, dt, player)
+        print('je bouge:')
+    end
+)
+  
+require "character"
+
+-- lv1 enemies
+local entities = require "levels.1.badguys"
 
 local sti = require "lib.sti"
-local anim8 = require "lib.anim8"
+-- local anim8 = require "lib.anim8"
 local inspect = require "lib.inspect"
 
-local image, animation
+local image, spriteLayer, player
 
 -- Enabling debug mode
-local debug = true
+local debug = false
 
 function love.load()
+  
+    batImg = love.graphics.newImage("assets/images/sprites2.png")
+    
     -- Set world meter size (in pixels)
     love.physics.setMeter(48)
 
     -- Load a map exported to Lua from Tiled
-    map = sti("assets/tilesets/map.lua", { "box2d" })
+    map = sti("assets/tilesets/map_lulu.lua", { "box2d" })
 
     -- Prepare physics world with horizontal and vertical gravity
     world = love.physics.newWorld(0, 0)
-
-    -- construct character animations
-    image = love.graphics.newImage("assets/images/sprites2.png")
-    local idle = anim8.newGrid(16, 16, image:getWidth(), image:getHeight())
-    animation = anim8.newAnimation(idle('1-3',1), 0.5)
 
     -- Prepare collision objects
     map:box2d_init(world)
@@ -32,38 +42,33 @@ function love.load()
     map:addCustomLayer("Sprite Layer", 4)
 
     -- Add data to Custom Layer
-    --image = love.graphics.newImage("assets/images/sprite.png")
-    local spriteLayer = map.layers["Sprite Layer"]
-    spriteLayer.sprites = {
-        player = {
-            image = love.graphics.newImage("assets/images/sprites2.png"),
-            x = 0,
-            y = 0
-        }
-    }
+    image = love.graphics.newImage("assets/images/sprite.png")
+    spriteLayer = map.layers["Sprite Layer"]
+    
+    -- appending player
+    myPlayer = Character(0, 0, "assets/images/sprite.png")
+    spriteLayer.sprites = {player = myPlayer:draw()}
 
     -- Get player spawn object from Tiled
     local playerObj
     for k, object in pairs(map.objects) do
-        if object.name == "Player" then
+        if object.name == "player" then
             playerObj = object
             break
         end
     end
-    print(inspect(playerObj))
 
     player = spriteLayer.sprites.player
     player.body = love.physics.newBody(world, playerObj.x, playerObj.y, 'dynamic')
     player.body:setLinearDamping(10)
     player.body:setFixedRotation(true)
-
     player.shape = love.physics.newRectangleShape(14, 14)
     player.fixture = love.physics.newFixture(player.body, player.shape)
-
+    
     -- Update callback for Custom Layer
-    function spriteLayer:update(dt)
+--    function spriteLayer:update(dt)
 
-    end
+--    end
 
     -- Draw callback for Custom Layer
     function spriteLayer:draw()
@@ -71,33 +76,43 @@ function love.load()
             local x = math.floor(sprite.x)
             local y = math.floor(sprite.y)
             local r = sprite.r
-            animation:draw(sprite.image, x - 3, y - 3)
+            love.graphics.draw(sprite.image, x, y)
         end
     end
 end
 
 function love.update(dt)
-
+  
+--    for _, entity in ipairs(entities) do
+--        updateMotion(entity, dt, player)
+--    end
+    
     local down = love.keyboard.isDown
   
     local x, y= 0, 0
-    local speed = 48
+    local speed = 100
     
     if down("z","up") and player.y > 8    then y = y - speed end
     if down("s","down")     then y = y + speed end
     if down("q", "left") and player.x > 8    then x = x - speed end
-    if down("d", "right")    then x = x + speed end
+    if down("d", "right") then  x = x + speed end
     player.body:applyForce(x, y)
     player.x = player.body:getX() - 4
     player.y = player.body:getY() - 4
 
     -- updates routines
-    animation:update(dt)
     map:update(dt)
     world:update(dt)
 end
 
 function love.draw()
+  
+    -- draw entities
+    for _, entity in ipairs(entities) do
+        local char = Character(entity.pos.x, entity.pos.y, entity.sprite)
+        table.insert(spriteLayer.sprites, char:draw())
+    end
+    
       -- Scale world
     local scale = 2
     local screen_width = love.graphics.getWidth() / scale
@@ -110,10 +125,6 @@ function love.draw()
     -- Transform world
     love.graphics.scale(scale)
     love.graphics.translate(-tx, -ty)
-
-    -- Translation would normally be based on a player's x/y
-    local translateX = 0
-    local translateY = 0
 
     -- Draw the map and all objects within
     map:draw()
