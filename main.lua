@@ -1,30 +1,32 @@
-local System = require 'lib.knife.system'
-
-local updateMotion = System(
-    { 'position', 'velocity' },
-    function (p, v, dt, player)
-        print('je bouge:')
-    end
-)
+local sti = require "lib.sti"
+local anim8 = require "lib.anim8"
+local inspect = require "lib.inspect"
 
 require "character"
-
 require "Projectile"
 
 -- lv1 enemies
 local entities = require "levels.1.badguys"
-
-local sti = require "lib.sti"
--- local anim8 = require "lib.anim8"
-local inspect = require "lib.inspect"
+local System = require 'lib.knife.system'
 
 local image, spriteLayer, player
 
+local updateMotion = System(
+    { 'name', 'pos', 'vel' },
+    function (name, pos, vel, dt)
+        local badGuy = spriteLayer.sprites[name]
+        local x = badGuy.x
+        local y = badGuy.y
+        --badGuy.body:applyForce(x, y)
+        --badGuy.x = badGuy.body:getX() - 4
+        
+    end)
+
 -- gestion des shoots
-local bullets={}
-local nb_pages=100
+local bullets = {}
+local nb_pages = 100
 -- Enabling debug mode
-local debug = true
+local debug = false
 
 function love.load()
     -- Set world meter size (in pixels)
@@ -49,7 +51,7 @@ function love.load()
 
     -- appending player
     myPlayer = Character(0, 0, "assets/images/sprite.png")
-    spriteLayer.sprites = {player = myPlayer:draw()}
+    spriteLayer.sprites = { player = myPlayer:draw() }
 
     -- Get player spawn object from Tiled
     local playerObj
@@ -67,11 +69,19 @@ function love.load()
     player.shape = love.physics.newRectangleShape(14, 14)
     player.fixture = love.physics.newFixture(player.body, player.shape)
 
-    -- Update callback for Custom Layer
---    function spriteLayer:update(dt)
-
---    end
-
+    -- draw entities
+    for _, entity in ipairs(entities) do
+        local char = Character(entity.pos.x, entity.pos.y, entity.sprite)
+        spriteLayer.sprites[entity.name] = char:draw()
+        local charObj = spriteLayer.sprites[entity.name]
+        charObj.body = love.physics.newBody(world, entity.pos.x, entity.pos.y, 'dynamic')
+        charObj.body:setLinearDamping(10)
+        charObj.body:setFixedRotation(true)
+        charObj.body:setGravityScale(0)
+        charObj.shape = love.physics.newRectangleShape(14, 14)
+        charObj.fixture = love.physics.newFixture(charObj.body, charObj.shape)
+    end
+    
     -- Draw callback for Custom Layer
     function spriteLayer:draw()
         for _, sprite in pairs(self.sprites) do
@@ -84,33 +94,40 @@ function love.load()
 end
 
 function love.update(dt)
+    
+    -- update entities
+    for _, entity in ipairs(entities) do
+      updateMotion(entity, dt)
+    end
+    -- love.event.quit()
+    
     --nombre de tirs restants
-     love.graphics.print("Dossier pole emplois :"..nb_pages,0,0)
+    love.graphics.print("Dossier pole emplois :" .. nb_pages, 0, 0)
     local down = love.keyboard.isDown
     local up = love.keyreleased(key)
 
-    local x, y= 0, 0
+    local x, y = 0, 0
     local speed = 48
-    
-    if down("z","up") and player.y > 8    then y = y - speed end
-    if down("s","down")     then y = y + speed end
-    if down("q", "left") and player.x > 8    then x = x - speed end
-    if down("d", "right")    then x = x + speed end
+
+    if down("z", "up") and player.y > 8 then y = y - speed end
+    if down("s", "down") then y = y + speed end
+    if down("q", "left") and player.x > 8 then x = x - speed end
+    if down("d", "right") then x = x + speed end
 
     player.body:applyForce(x, y)
     player.x = player.body:getX() - 4
     player.y = player.body:getY() - 4
 
     -- update bullets:
-  local i,o
-	for i, o in ipairs(bullets) do
-		o.x = o.x + o.speed * dt
-		--o.y = o.y + o.speed * dt
-		if (o.x < -10) or (o.x > love.graphics.getWidth() + 10)
-		or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
-			table.remove(bullets, i)
+    local i, o
+    for i, o in ipairs(bullets) do
+        o.x = o.x + o.speed * dt
+        --o.y = o.y + o.speed * dt
+        if (o.x < -10) or (o.x > love.graphics.getWidth() + 10)
+                or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
+            table.remove(bullets, i)
+        end
     end
-	end
 
     -- updates routines
     map:update(dt)
@@ -119,13 +136,7 @@ end
 
 function love.draw()
 
-    -- draw entities
-    for _, entity in ipairs(entities) do
-        local char = Character(entity.pos.x, entity.pos.y, entity.sprite)
-        table.insert(spriteLayer.sprites, char:draw())
-    end
-
-      -- Scale world
+    -- Scale world
     local scale = 2
     local screen_width = love.graphics.getWidth() / scale
     local screen_height = love.graphics.getHeight() / scale
@@ -142,33 +153,33 @@ function love.draw()
     map:draw()
 
     -- draw bullets:
-	love.graphics.setColor(255, 255, 255, 224)
+    love.graphics.setColor(255, 255, 255, 224)
 
-  local i, o
-	for i, o in pairs(bullets) do
-      love.graphics.circle('fill', o.x, o.y, 5, 4)
-  end
+    local i, o
+    for i, o in pairs(bullets) do
+        love.graphics.circle('fill', o.x, o.y, 5, 4)
+    end
 
     if debug then
-      -- Draw Collision Map
-      love.graphics.setColor(255, 0, 0, 255)
-      map:box2d_draw()
-      love.graphics.polygon("line", player.body:getWorldPoints(player.shape:getPoints()))
-      
-      -- player debug
-      love.graphics.setColor(255, 255, 0, 255)
-      love.graphics.setPointSize(5)
-      love.graphics.points(math.floor(player.x), math.floor(player.y))
-      love.graphics.setColor(255, 255, 255, 255)
-      love.graphics.print(math.floor(player.x)..','..math.floor(player.y), player.x-16, player.y-16)
+        -- Draw Collision Map
+        love.graphics.setColor(255, 0, 0, 255)
+        map:box2d_draw()
+        love.graphics.polygon("line", player.body:getWorldPoints(player.shape:getPoints()))
+
+        -- player debug
+        love.graphics.setColor(255, 255, 0, 255)
+        love.graphics.setPointSize(5)
+        love.graphics.points(math.floor(player.x), math.floor(player.y))
+        love.graphics.setColor(255, 255, 255, 255)
+        love.graphics.print(math.floor(player.x) .. ',' .. math.floor(player.y), player.x - 16, player.y - 16)
     end
 end
 
 function love.keyreleased(key, unicode)
-   if key == 'space' then
-    local direction = math.atan2(player.y+20, player.x+10)
-        prjt = Projectile(player.x+10,player.y,100,direction,"assets/images/paper.png")
-        table.insert(bullets,prjt:draw())
-        nb_pages = nb_pages -1
-   end
+    if key == 'space' then
+        local direction = math.atan2(player.y + 20, player.x + 10)
+        prjt = Projectile(player.x + 10, player.y, 100, direction, "assets/images/paper.png")
+        table.insert(bullets, prjt:draw())
+        nb_pages = nb_pages - 1
+    end
 end
