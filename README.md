@@ -4,6 +4,7 @@ is made with LOVE game engine
 ## LOVE libs
 * [Simple Tiled Implementation](https://github.com/karai17/Simple-Tiled-Implementation)
 * [Anim8](https://github.com/kikito/anim8)
+* [Classic] (https://github.com/rxi/classic/)
 
 ## Useful related readings
 
