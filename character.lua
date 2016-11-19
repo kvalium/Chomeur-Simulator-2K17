@@ -4,10 +4,11 @@ Character = Object:extend()
 
 -- constructor
 
-function Character:new(x, y, sprite)
+function Character:new(x, y, sprite, sound)
     self.x = x or 0
     self.y = y or 0
     self.sprite = love.graphics.newImage(sprite)
+    self.sound = sound or 'assets/sounds/goutte-deau.wav'
 end
 
 -- draw the Character 
@@ -15,7 +16,8 @@ function Character:draw()
   return {
       image = self.sprite,
       x = self.x,
-      y = self.y
+      y = self.y,
+      sound = self.sound
   }
 end
 
