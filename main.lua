@@ -9,6 +9,7 @@ local image, animation
 
 -- gestion des shoots
 local bullets={}
+local nb_pages=100
 -- Enabling debug mode
 local debug = true
 
@@ -80,7 +81,8 @@ function love.load()
 end
 
 function love.update(dt)
-
+    --nombre de tirs restants
+     love.graphics.print("Dossier pole emplois :"..nb_pages,0,0)
     local down = love.keyboard.isDown
     local up = love.keyreleased(key)
     
@@ -101,7 +103,7 @@ function love.update(dt)
 	for i, o in ipairs(bullets) do
 		o.x = o.x + o.speed * dt
 		--o.y = o.y + o.speed * dt
-		if (bullets[i].x < -10) or (bullets[i].x > love.graphics.getWidth() + 10)
+		if (o.x < -10) or (o.x > love.graphics.getWidth() + 10)
 		or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
 			table.remove(bullets, i)
     end
@@ -162,5 +164,6 @@ function love.keyreleased(key, unicode)
     local direction = math.atan2(player.y+20, player.x+10)
         prjt = Projectile(player.x+10,player.y,100,direction,"assets/images/paper.png")
         table.insert(bullets,prjt:draw())
+        nb_pages = nb_pages -1
    end
 end
