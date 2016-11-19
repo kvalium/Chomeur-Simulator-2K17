@@ -1,4 +1,5 @@
 -- This example uses the default box2d (love.physics) plugin!!
+require "Projectile"
 
 local sti = require "lib.sti"
 local anim8 = require "lib.anim8"
@@ -6,6 +7,8 @@ local inspect = require "lib.inspect"
 
 local image, animation
 
+-- gestion des shoots
+local bullets={}
 -- Enabling debug mode
 local debug = true
 
@@ -33,7 +36,7 @@ function love.load()
 
     -- Add data to Custom Layer
     --image = love.graphics.newImage("assets/images/sprite.png")
-    local spriteLayer = map.layers["Sprite Layer"]
+    spriteLayer = map.layers["Sprite Layer"]
     spriteLayer.sprites = {
         player = {
             image = love.graphics.newImage("assets/images/sprites2.png"),
@@ -79,7 +82,8 @@ end
 function love.update(dt)
 
     local down = love.keyboard.isDown
-  
+    local up = love.keyreleased(key)
+    
     local x, y= 0, 0
     local speed = 48
     
@@ -87,9 +91,21 @@ function love.update(dt)
     if down("s","down")     then y = y + speed end
     if down("q", "left") and player.x > 8    then x = x - speed end
     if down("d", "right")    then x = x + speed end
+    
     player.body:applyForce(x, y)
     player.x = player.body:getX() - 4
     player.y = player.body:getY() - 4
+
+    -- update bullets:
+  local i,o
+	for i, o in ipairs(bullets) do
+		o.x = o.x + o.speed * dt
+		--o.y = o.y + o.speed * dt
+		if (bullets[i].x < -10) or (bullets[i].x > love.graphics.getWidth() + 10)
+		or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
+			table.remove(bullets, i)
+    end
+	end
 
     -- updates routines
     animation:update(dt)
@@ -118,6 +134,14 @@ function love.draw()
     -- Draw the map and all objects within
     map:draw()
 
+    -- draw bullets:
+	love.graphics.setColor(255, 255, 255, 224)
+	
+  local i, o
+	for i, o in pairs(bullets) do  
+      love.graphics.circle('fill', o.x, o.y, 5, 4)
+  end
+
     if debug then
       -- Draw Collision Map
       love.graphics.setColor(255, 0, 0, 255)
@@ -131,4 +155,12 @@ function love.draw()
       love.graphics.setColor(255, 255, 255, 255)
       love.graphics.print(math.floor(player.x)..','..math.floor(player.y), player.x-16, player.y-16)
     end
+end
+
+function love.keyreleased(key, unicode)
+   if key == 'space' then
+    local direction = math.atan2(player.y+20, player.x+10)
+        prjt = Projectile(player.x+10,player.y,100,direction,"assets/images/paper.png")
+        table.insert(bullets,prjt:draw())
+   end
 end
