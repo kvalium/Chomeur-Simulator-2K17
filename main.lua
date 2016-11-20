@@ -236,19 +236,23 @@ local splashScreen, splashTitle, splashCommand
 local splashTransX = 0
 local splashTransY = 0
 local splashTransSpeed = 0.1
+local splashMusic = love.audio.newSource("assets/sounds/crazy_frog_techno.wav")
 
 -- Intro screen load
 function introLoad()
     splashScreen = love.graphics.newImage("assets/images/splashScreen.png")
     splashTitle = love.graphics.newImage("assets/images/splashTitle.png")
     splashCommand = love.graphics.newImage("assets/images/splashCommand.png")
+    splashMusic:play()
+    splashMusic:setVolume(0.7)
 end
 
 function introUpdate(dt)
     local down = love.keyboard.isDown
     love.graphics.translate(dt, dt)
     
-    if down("space") then 
+    if down("space") then
+      love.audio.stop(splashMusic)
       gameLoadLevel(1)
       state = "game"
     end
@@ -271,7 +275,7 @@ function beginContact(a, b, coll)
     if a:getUserData() == 'Player' then
       -- play ennemy sound
       local ennemy = spriteLayer.sprites[b:getUserData()]
-      local ennemySound = love.audio.newSource(ennemy.sound)
+      local ennemySound = love.audio.newSource(ennemy.sound, 'static')
       ennemySound:play()
       player.lives = player.lives - 1
       if player.lives == 0 then

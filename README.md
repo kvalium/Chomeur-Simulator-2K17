@@ -14,3 +14,6 @@ is made with LOVE game engine
 ## Assets sources
 * [Character](http://opengameart.org/content/classic-hero-and-baddies-pack)
 * [Theme, decoration](http://opengameart.org/content/roguelike-modern-city-pack)
+
+Credits
+http://opengameart.org/content/wgs-music-41-vs-tom-3-loops
