@@ -7,6 +7,7 @@ require "Projectile"
 
 -- lv1 enemies
 local entities = require "levels.1.badguys"
+local levels = require "levels.levels"
 local System = require 'lib.knife.system'
 
 local image, spriteLayer, player, sound
@@ -56,7 +57,6 @@ function love.update(dt)
         updateMotion(entity, dt)
         local obj = spriteLayer.sprites[entity.name]
       end
-      -- love.event.quit()
       
       --nombre de tirs restants
       love.graphics.print("Dossier pole emplois :" .. nb_pages, 0, 0)
@@ -213,11 +213,12 @@ end
 
 -- Level loader handler
 function gameLoadLevel(level)
+    local levelData = levels[currentLevel]
       -- Set world meter size (in pixels)
     love.physics.setMeter(48)
 
     -- Load a map exported to Lua from Tiled
-    map = sti("assets/tilesets/map_lulu.lua", { "box2d" })
+    map = sti(levelData.map, { "box2d" })
 
     -- Prepare physics world with horizontal and vertical gravity
     world = love.physics.newWorld(0, 0, true)
@@ -257,18 +258,31 @@ function gameLoadLevel(level)
     player.fixture:setUserData('Player')
 
     -- draw entities
-    for _, entity in ipairs(entities) do
-        local char = Character(entity.pos.x, entity.pos.y, entity.sprite, entity.sound)
-        spriteLayer.sprites[entity.name] = char:draw()
-        local charObj = spriteLayer.sprites[entity.name]
-        charObj.body = love.physics.newBody(world, entity.pos.x, entity.pos.y, 'dynamic')
-        charObj.body:setLinearDamping(10)
-        charObj.body:setFixedRotation(true)
-        charObj.shape = love.physics.newRectangleShape(14, 14)
-        charObj.fixture = love.physics.newFixture(charObj.body, charObj.shape)
-        charObj.fixture:setUserData(entity.name)
-        charObj.fixture:setRestitution(5)
+    local enemyCounter = 1
+    for k, enemy in pairs(map.objects) do
+        if enemy.type == "enemy" then
+            local char = Character(enemy.x, enemy.y)
+            local entity = {name = "enemy_"..enemyCounter}
+            if enemyCounter <= #entities then
+                entity = entities[enemyCounter]
+                char = Character(enemy.x, enemy.y, entity.sprite, entity.sound)
+            else
+                table.insert(entities,entity)
+            end
+            spriteLayer.sprites[entity.name] = char:draw()
+            local charObj = spriteLayer.sprites[entity.name]
+            charObj.body = love.physics.newBody(world, enemy.x, enemy.y, 'dynamic')
+            charObj.body:setLinearDamping(10)
+            charObj.body:setFixedRotation(true)
+            charObj.shape = love.physics.newRectangleShape(14, 14)
+            charObj.fixture = love.physics.newFixture(charObj.body, charObj.shape)
+            charObj.fixture:setUserData(entity.name)
+            charObj.fixture:setRestitution(5)
+            enemyCounter = enemyCounter + 1
+        end
     end
+    
+    print(inspect(spriteLayer.sprites))
     
     -- Draw callback for Custom Layer
     function spriteLayer:draw()
@@ -279,6 +293,8 @@ function gameLoadLevel(level)
             love.graphics.draw(sprite.image, x, y)
         end
     end
+    
+    map:removeLayer('spawnPoint')
     -- welcome sound
     local welcomeSound = love.audio.newSource("assets/sounds/Lets_go.wav", "static")
     welcomeSound:play()

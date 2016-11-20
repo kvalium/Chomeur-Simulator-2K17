@@ -7,7 +7,7 @@ Character = Object:extend()
 function Character:new(x, y, sprite, sound)
     self.x = x or 0
     self.y = y or 0
-    self.sprite = love.graphics.newImage(sprite)
+    self.sprite = love.graphics.newImage(sprite or 'assets/images/scarabee.png')
     self.sound = sound or 'assets/sounds/goutte-deau.wav'
 end
 
