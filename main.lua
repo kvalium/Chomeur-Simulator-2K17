@@ -33,8 +33,18 @@ local updateMotion = System(
 local bullets = {}
 local nb_pages = 100
 
+-- game state
+local state = 'intro' 
+
+
 function love.load()
-    -- Set world meter size (in pixels)
+    introLoad()
+    -- gameLoadLevel(1)
+end
+
+-- Level loader handler
+function gameLoadLevel(level)
+      -- Set world meter size (in pixels)
     love.physics.setMeter(48)
 
     -- Load a map exported to Lua from Tiled
@@ -100,108 +110,112 @@ function love.load()
             love.graphics.draw(sprite.image, x, y)
         end
     end
-    
-    -- welcome sound
-    local welcomeSound = love.audio.newSource("assets/sounds/Lets_go.wav", "static")
-    welcomeSound:play()
+
 end
 
 function love.update(dt)
-    
-    -- update entities
-    for _, entity in ipairs(entities) do
-      updateMotion(entity, dt)
-      local obj = spriteLayer.sprites[entity.name]
+    if state == 'intro' then
+      introUpdate(dt)
+    else
+      -- update entities
+      for _, entity in ipairs(entities) do
+        updateMotion(entity, dt)
+        local obj = spriteLayer.sprites[entity.name]
+      end
+      -- love.event.quit()
+      
+      --nombre de tirs restants
+      love.graphics.print("Dossier pole emplois :" .. nb_pages, 0, 0)
+      local down = love.keyboard.isDown
+      local up = love.keyreleased(key)
+
+      local x, y = 0, 0
+      local speed = 48
+
+      if down("z", "up") and player.y > 8 then y = y - speed end
+      if down("s", "down") then y = y + speed end
+      if down("q", "left") and player.x > 8 then x = x - speed end
+      if down("d", "right") then x = x + speed end
+
+      player.body:applyForce(x, y)
+      player.x = player.body:getX() - 8
+      player.y = player.body:getY() - 8
+
+      -- update bullets:
+      local i, o
+      for i, o in ipairs(bullets) do
+          o.x = o.x + o.speed * dt
+          --o.y = o.y + o.speed * dt
+          if (o.x < -10) or (o.x > love.graphics.getWidth() + 10)
+                  or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
+              table.remove(bullets, i)
+          end
+      end
+
+      -- updates routines
+      map:update(dt)
+      world:update(dt)
     end
-    -- love.event.quit()
-    
-    --nombre de tirs restants
-    love.graphics.print("Dossier pole emplois :" .. nb_pages, 0, 0)
-    local down = love.keyboard.isDown
-    local up = love.keyreleased(key)
-
-    local x, y = 0, 0
-    local speed = 48
-
-    if down("z", "up") and player.y > 8 then y = y - speed end
-    if down("s", "down") then y = y + speed end
-    if down("q", "left") and player.x > 8 then x = x - speed end
-    if down("d", "right") then x = x + speed end
-
-    player.body:applyForce(x, y)
-    player.x = player.body:getX() - 8
-    player.y = player.body:getY() - 8
-
-    -- update bullets:
-    local i, o
-    for i, o in ipairs(bullets) do
-        o.x = o.x + o.speed * dt
-        --o.y = o.y + o.speed * dt
-        if (o.x < -10) or (o.x > love.graphics.getWidth() + 10)
-                or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
-            table.remove(bullets, i)
-        end
-    end
-
-    -- updates routines
-    map:update(dt)
-    world:update(dt)
 end
 
+
 function love.draw()
+    if state == 'intro' then
+      introDraw()
+    else
+      -- Scale world
+      local scale = 2
+      local screen_width = love.graphics.getWidth() / scale
+      local screen_height = love.graphics.getHeight() / scale
 
-    -- Scale world
-    local scale = 2
-    local screen_width = love.graphics.getWidth() / scale
-    local screen_height = love.graphics.getHeight() / scale
+      -- Translate world so that player is always centred
+      local tx = math.floor(player.x - screen_width / 2)
+      local ty = math.floor(player.y - screen_height / 2)
 
-    -- Translate world so that player is always centred
-    local tx = math.floor(player.x - screen_width / 2)
-    local ty = math.floor(player.y - screen_height / 2)
+      -- Transform world
+      love.graphics.scale(scale)
+      love.graphics.translate(-tx, -ty)
 
-    -- Transform world
-    love.graphics.scale(scale)
-    love.graphics.translate(-tx, -ty)
+      -- Draw the map and all objects within
+      map:draw()
 
-    -- Draw the map and all objects within
-    map:draw()
+      -- draw bullets:
+      love.graphics.setColor(255, 255, 255, 224)
 
-    -- draw bullets:
-    love.graphics.setColor(255, 255, 255, 224)
+      local i, o
+      for i, o in pairs(bullets) do
+          love.graphics.circle('fill', o.x, o.y, 5, 4)
+      end
 
-    local i, o
-    for i, o in pairs(bullets) do
-        love.graphics.circle('fill', o.x, o.y, 5, 4)
+      if debug then
+          -- Draw Collision Map
+          love.graphics.setColor(255, 0, 0, 50)
+          map:box2d_draw()
+
+          -- player debug
+          love.graphics.setColor(255, 255, 255, 255)
+          love.graphics.polygon("line", player.body:getWorldPoints(player.shape:getPoints()))
+          love.graphics.print(math.floor(player.x) .. ',' .. math.floor(player.y), player.x - 16, player.y - 16)    
+          
+          -- entities debug
+          love.graphics.setColor(255, 0, 0, 255)
+          for _, entity in ipairs(entities) do
+            local badGuy = spriteLayer.sprites[entity.name]
+            love.graphics.polygon("line", badGuy.body:getWorldPoints(player.shape:getPoints()))
+            love.graphics.print(math.floor(badGuy.x) .. ',' .. math.floor(badGuy.y), badGuy.x - 16, badGuy.y - 16)
+          end
+          love.graphics.setColor(255, 255, 255, 255)
+      end
+      
+      -- "HUD"
+      
+      love.graphics.setColor(0, 100, 100, 200)
+      love.graphics.rectangle('fill', player.x - 300, player.y + 130, 1000,1000)
+      love.graphics.setColor(0, 0, 0, 255)
+      love.graphics.print('Lives '..player.lives, player.x + 120,  player.y + 135)   
+      
+      love.graphics.setColor(255, 255, 255, 255)
     end
-
-    if debug then
-        -- Draw Collision Map
-        love.graphics.setColor(255, 0, 0, 50)
-        map:box2d_draw()
-
-        -- player debug
-        love.graphics.setColor(255, 255, 255, 255)
-        love.graphics.polygon("line", player.body:getWorldPoints(player.shape:getPoints()))
-        love.graphics.print(math.floor(player.x) .. ',' .. math.floor(player.y), player.x - 16, player.y - 16)    
-        
-        -- entities debug
-        love.graphics.setColor(255, 0, 0, 255)
-        for _, entity in ipairs(entities) do
-          local badGuy = spriteLayer.sprites[entity.name]
-          love.graphics.polygon("line", badGuy.body:getWorldPoints(player.shape:getPoints()))
-          love.graphics.print(math.floor(badGuy.x) .. ',' .. math.floor(badGuy.y), badGuy.x - 16, badGuy.y - 16)
-        end
-        love.graphics.setColor(255, 255, 255, 255)
-    end
-    
-    -- "HUD"
-    
-    love.graphics.setColor(0, 100, 100, 200)
-    love.graphics.rectangle('fill', player.x - 300, player.y + 130, 1000,1000)
-    love.graphics.setColor(0, 0, 0, 255)
-    love.graphics.print('Lives '..player.lives, player.x + 120,  player.y + 135)   
-    
-    love.graphics.setColor(255, 255, 255, 255)
 end
 
 function love.keyreleased(key, unicode)
@@ -213,6 +227,44 @@ function love.keyreleased(key, unicode)
     end
 end
 
+
+-- ***********************
+-- INTRO FUNCTIONS
+-- ***********************
+
+local splashScreen, splashTitle, splashCommand
+local splashTransX = 0
+local splashTransY = 0
+local splashTransSpeed = 0.1
+
+-- Intro screen load
+function introLoad()
+    splashScreen = love.graphics.newImage("assets/images/splashScreen.png")
+    splashTitle = love.graphics.newImage("assets/images/splashTitle.png")
+    splashCommand = love.graphics.newImage("assets/images/splashCommand.png")
+end
+
+function introUpdate(dt)
+    local down = love.keyboard.isDown
+    love.graphics.translate(dt, dt)
+    
+    if down("space") then 
+      gameLoadLevel(1)
+      state = "game"
+    end
+end
+
+function introDraw()
+    love.graphics.draw(splashScreen, splashTransX, splashTransY, 0, 0.8, 0.8, 0)
+    love.graphics.draw(splashTitle, 0, 300)
+    love.graphics.draw(splashCommand, 400, 550,0,0.5,0.5)
+    splashTransX = splashTransX - splashTransSpeed
+    splashTransY = splashTransY - splashTransSpeed / 5
+end
+
+-- ***********************
+-- COLISSION DETECTION
+-- ***********************
 function beginContact(a, b, coll)
     x,y = coll:getNormal()
     -- if something collide with the players
