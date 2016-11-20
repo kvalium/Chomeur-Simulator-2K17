@@ -1,4 +1,4 @@
-# loveGame Untitled game 
+# Chomeur Simulator 2017
 is made with LOVE game engine
 
 ## LOVE libs
