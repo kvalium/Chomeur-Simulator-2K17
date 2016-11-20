@@ -35,87 +35,21 @@ local nb_pages = 100
 
 -- game state
 local state = 'intro' 
+local currentLevel = 1
+
+-- player date
+local playerLives = 10
 
 
 function love.load()
     introLoad()
-    -- gameLoadLevel(1)
-end
-
--- Level loader handler
-function gameLoadLevel(level)
-      -- Set world meter size (in pixels)
-    love.physics.setMeter(48)
-
-    -- Load a map exported to Lua from Tiled
-    map = sti("assets/tilesets/map_lulu.lua", { "box2d" })
-
-    -- Prepare physics world with horizontal and vertical gravity
-    world = love.physics.newWorld(0, 0, true)
-        world:setCallbacks(beginContact, endContact, preSolve, postSolve)
-    
-    -- Prepare collision objects
-    map:box2d_init(world)
-    world:setCallbacks(beginContact)
-
-    -- Create a Custom Layer
-    map:addCustomLayer("Sprite Layer", 4)
-
-    -- Add data to Custom Layer
-    image = love.graphics.newImage("assets/images/sprite.png")
-    spriteLayer = map.layers["Sprite Layer"]
-
-    -- appending player
-    myPlayer = Character(0, 0, "assets/images/sprite.png")
-    spriteLayer.sprites = { player = myPlayer:draw() }
-
-    -- Get player spawn object from Tiled
-    local playerObj
-    for k, object in pairs(map.objects) do
-        if object.name == "player" then
-            playerObj = object
-            break
-        end
-    end
-
-    player = spriteLayer.sprites.player
-    player.body = love.physics.newBody(world, playerObj.x, playerObj.y, 'dynamic')
-    player.body:setLinearDamping(10)
-    player.body:setFixedRotation(true)
-    player.shape = love.physics.newRectangleShape(14, 14)
-    player.lives = 20
-    player.fixture = love.physics.newFixture(player.body, player.shape)
-    player.fixture:setUserData('Player')
-
-    -- draw entities
-    for _, entity in ipairs(entities) do
-        local char = Character(entity.pos.x, entity.pos.y, entity.sprite, entity.sound)
-        spriteLayer.sprites[entity.name] = char:draw()
-        local charObj = spriteLayer.sprites[entity.name]
-        charObj.body = love.physics.newBody(world, entity.pos.x, entity.pos.y, 'dynamic')
-        charObj.body:setLinearDamping(10)
-        charObj.body:setFixedRotation(true)
-        charObj.shape = love.physics.newRectangleShape(14, 14)
-        charObj.fixture = love.physics.newFixture(charObj.body, charObj.shape)
-        charObj.fixture:setUserData(entity.name)
-        charObj.fixture:setRestitution(5)
-    end
-    
-    -- Draw callback for Custom Layer
-    function spriteLayer:draw()
-        for _, sprite in pairs(self.sprites) do
-            local x = math.floor(sprite.x)
-            local y = math.floor(sprite.y)
-            local r = sprite.r
-            love.graphics.draw(sprite.image, x, y)
-        end
-    end
-
 end
 
 function love.update(dt)
     if state == 'intro' then
       introUpdate(dt)
+    elseif state == 'gameover' then
+      gameOverUpdate(dt)
     else
       -- update entities
       for _, entity in ipairs(entities) do
@@ -162,6 +96,8 @@ end
 function love.draw()
     if state == 'intro' then
       introDraw()
+    elseif state == 'gameover' then
+      gameOverDraw()
     else
       -- Scale world
       local scale = 2
@@ -251,19 +187,117 @@ function introUpdate(dt)
     local down = love.keyboard.isDown
     love.graphics.translate(dt, dt)
     
+    -- splash music loop
+    if splashMusic:isStopped() then
+      splashMusic:play()
+    end
+    
     if down("space") then
       love.audio.stop(splashMusic)
-      gameLoadLevel(1)
+      gameLoadLevel(currentLevel)
       state = "game"
     end
 end
-
+ 
 function introDraw()
     love.graphics.draw(splashScreen, splashTransX, splashTransY, 0, 0.8, 0.8, 0)
     love.graphics.draw(splashTitle, 0, 300)
     love.graphics.draw(splashCommand, 400, 550,0,0.5,0.5)
     splashTransX = splashTransX - splashTransSpeed
     splashTransY = splashTransY - splashTransSpeed / 5
+end
+
+-- ***********************
+-- GAME FUNCTIONS
+-- ***********************
+
+-- Level loader handler
+function gameLoadLevel(level)
+      -- Set world meter size (in pixels)
+    love.physics.setMeter(48)
+
+    -- Load a map exported to Lua from Tiled
+    map = sti("assets/tilesets/map_lulu.lua", { "box2d" })
+
+    -- Prepare physics world with horizontal and vertical gravity
+    world = love.physics.newWorld(0, 0, true)
+        world:setCallbacks(beginContact, endContact, preSolve, postSolve)
+    
+    -- Prepare collision objects
+    map:box2d_init(world)
+    world:setCallbacks(beginContact)
+
+    -- Create a Custom Layer
+    map:addCustomLayer("Sprite Layer", 4)
+
+    -- Add data to Custom Layer
+    image = love.graphics.newImage("assets/images/sprite.png")
+    spriteLayer = map.layers["Sprite Layer"]
+
+    -- appending player
+    myPlayer = Character(0, 0, "assets/images/sprite.png")
+    spriteLayer.sprites = { player = myPlayer:draw() }
+
+    -- Get player spawn object from Tiled
+    local playerObj
+    for k, object in pairs(map.objects) do
+        if object.name == "player" then
+            playerObj = object
+            break
+        end
+    end
+
+    player = spriteLayer.sprites.player
+    player.body = love.physics.newBody(world, playerObj.x, playerObj.y, 'dynamic')
+    player.body:setLinearDamping(10)
+    player.body:setFixedRotation(true)
+    player.shape = love.physics.newRectangleShape(14, 14)
+    player.lives = playerLives
+    player.fixture = love.physics.newFixture(player.body, player.shape)
+    player.fixture:setUserData('Player')
+
+    -- draw entities
+    for _, entity in ipairs(entities) do
+        local char = Character(entity.pos.x, entity.pos.y, entity.sprite, entity.sound)
+        spriteLayer.sprites[entity.name] = char:draw()
+        local charObj = spriteLayer.sprites[entity.name]
+        charObj.body = love.physics.newBody(world, entity.pos.x, entity.pos.y, 'dynamic')
+        charObj.body:setLinearDamping(10)
+        charObj.body:setFixedRotation(true)
+        charObj.shape = love.physics.newRectangleShape(14, 14)
+        charObj.fixture = love.physics.newFixture(charObj.body, charObj.shape)
+        charObj.fixture:setUserData(entity.name)
+        charObj.fixture:setRestitution(5)
+    end
+    
+    -- Draw callback for Custom Layer
+    function spriteLayer:draw()
+        for _, sprite in pairs(self.sprites) do
+            local x = math.floor(sprite.x)
+            local y = math.floor(sprite.y)
+            local r = sprite.r
+            love.graphics.draw(sprite.image, x, y)
+        end
+    end
+    -- welcome sound
+    local welcomeSound = love.audio.newSource("assets/sounds/Lets_go.wav", "static")
+    welcomeSound:play()
+end
+
+-- ***********************
+-- GAMEOVER FUNCTIONS
+-- ***********************
+
+function gameOverUpdate(dt)
+    local down = love.keyboard.isDown
+    if down("escape") then
+      love.event.quit('restart')
+    end
+end
+ 
+function gameOverDraw()
+    love.graphics.print('YOU DIED!',  100, 100)   
+    love.graphics.print("Appuyez sur l'échap bouton pour recommencer",  200, 200)   
 end
 
 -- ***********************
@@ -279,7 +313,7 @@ function beginContact(a, b, coll)
       ennemySound:play()
       player.lives = player.lives - 1
       if player.lives == 0 then
-          love.event.quit('restart')
+          state = "gameover"
       end
     end
 end
