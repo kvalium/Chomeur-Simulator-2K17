@@ -34,6 +34,7 @@ local updateMotion = System(
 local bullets = {}
 local nb_pages = 100
 
+local direction_player = 1;
 -- game state
 local state = 'intro' 
 local currentLevel = 1
@@ -58,18 +59,28 @@ function love.update(dt)
         local obj = spriteLayer.sprites[entity.name]
       end
       
-      --nombre de tirs restants
-      love.graphics.print("Dossier pole emplois :" .. nb_pages, 0, 0)
       local down = love.keyboard.isDown
       local up = love.keyreleased(key)
 
       local x, y = 0, 0
       local speed = 48
 
-      if down("z", "up") and player.y > 8 then y = y - speed end
-      if down("s", "down") then y = y + speed end
-      if down("q", "left") and player.x > 8 then x = x - speed end
-      if down("d", "right") then x = x + speed end
+      if down("z", "up") and player.y > 8 then 
+        y = y - speed
+        direction_player = 4
+      end
+      if down("s", "down") then 
+        y = y + speed 
+        direction_player = 2
+      end
+      if down("q", "left") and player.x > 8 then 
+        x = x - speed 
+        direction_player = 3
+      end
+      if down("d", "right") then 
+        x = x + speed 
+        direction_player = 1
+      end
 
       player.body:applyForce(x, y)
       player.x = player.body:getX() - 8
@@ -78,12 +89,27 @@ function love.update(dt)
       -- update bullets:
       local i, o
       for i, o in ipairs(bullets) do
+         if o.dir ==1 then
           o.x = o.x + o.speed * dt
-          --o.y = o.y + o.speed * dt
-          if (o.x < -10) or (o.x > love.graphics.getWidth() + 10)
-                  or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
-              table.remove(bullets, i)
+        elseif o.dir ==2 then
+          o.y = o.y + o.speed * dt
+        elseif o.dir ==3 then
+          o.x = o.x - o.speed * dt
+        elseif o.dir ==4 then
+          o.y = o.y - o.speed * dt
+        end
+        if (o.x < -10) or (o.x > love.graphics.getWidth() + 10)
+                or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
+            table.remove(bullets, i)
+        end
+        for _, entity in ipairs(entities) do
+          if o.x >= entity.x and o.x <= entity.x+16
+            if o.y >= entity.y and o.y <= entity.y+16
+              -- on tire sur un ennemis
+              
+            end
           end
+        end
       end
 
       -- updates routines
@@ -151,18 +177,26 @@ function love.draw()
       love.graphics.print('Lives '..player.lives, player.x + 120,  player.y + 135)   
       
       love.graphics.setColor(255, 255, 255, 255)
+    
+      
+      --nombre de tirs restants
+      love.graphics.setColor(0, 150, 100, 255)
+      love.graphics.print("Dossier pole emplois :" .. nb_pages, player.x - 200, player.y - 150)
+    
     end
 end
 
 function love.keyreleased(key, unicode)
     if key == 'space' then
-        local direction = math.atan2(player.y + 20, player.x + 10)
-        prjt = Projectile(player.x + 10, player.y, 100, direction, "assets/images/paper.png")
-        table.insert(bullets, prjt:draw())
-        nb_pages = nb_pages - 1
+        if nb_pages>0 then
+          local direction = math.atan2(player.y + 20, player.x + 10)
+          prjt = Projectile(player.x + 10, player.y, 100, direction_player, "assets/images/paper.png")
+          table.insert(bullets, prjt:draw())
+          nb_pages = nb_pages - 1
+        end
     end
 end
-
+--------------
 
 -- ***********************
 -- INTRO FUNCTIONS
