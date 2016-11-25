@@ -14,7 +14,7 @@ is made with LOVE game engine
 
 ## Assets sources
 * [Character](http://opengameart.org/content/classic-hero-and-baddies-pack)
-* [Theme, decoration](http://opengameart.org/content/roguelike-modern-city-pack)
+* awesome [Roguelike Modern City Pack](http://opengameart.org/content/roguelike-modern-city-pack) from Kenney.nl
 
 # Credits
-@TODO
+
