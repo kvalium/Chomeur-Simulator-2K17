@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="60" tilewidth="16" tileheight="16" nextobjectid="32">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="60" tilewidth="16" tileheight="16" nextobjectid="36">
  <tileset firstgid="1" name="roguelikeCity" tilewidth="16" tileheight="16" spacing="1" tilecount="1036" columns="37">
-  <image source="../roguelikeCity.png" width="628" height="475"/>
+  <image source="roguelikeCity.png" width="628" height="475"/>
  </tileset>
  <layer name="back2" width="40" height="60">
   <data encoding="csv">
@@ -131,16 +131,12 @@
 890,890,322,84,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,85,86
 </data>
  </layer>
- <objectgroup name="spawnPoint">
-  <object id="1" name="player" x="593.333" y="85.6667" width="16" height="16"/>
-  <object id="24" name="exit" type="exit" x="624" y="911" width="14" height="48"/>
- </objectgroup>
- <objectgroup name="enemies">
-  <object id="2" name="enemy1" type="enemy" x="257" y="79" width="16" height="16"/>
-  <object id="3" name="enemy2" type="enemy" x="64.5" y="80.5" width="16" height="16"/>
-  <object id="5" name="enemy" type="enemy" x="96" y="239.667" width="16" height="16"/>
-  <object id="13" name="enemy" type="enemy" x="199" y="384.5" width="16" height="16"/>
-  <object id="14" name="enemy" type="enemy" x="303.333" y="238.667" width="16" height="16"/>
+ <objectgroup name="objects">
+  <object id="2" name="enemy1" type="enemy" x="257" y="79" width="16" height="16" visible="0"/>
+  <object id="3" name="enemy2" type="enemy" x="64.5" y="80.5" width="16" height="16" visible="0"/>
+  <object id="5" name="enemy" type="enemy" x="96" y="239.667" width="16" height="16" visible="0"/>
+  <object id="13" name="enemy" type="enemy" x="199" y="384.5" width="16" height="16" visible="0"/>
+  <object id="14" name="enemy" type="enemy" x="303.333" y="238.667" width="16" height="16" visible="0"/>
   <object id="15" name="enemy" type="enemy" x="400" y="415.5" width="16" height="16"/>
   <object id="16" name="enemy" type="enemy" x="447" y="256" width="16" height="16"/>
   <object id="17" name="enemy" type="enemy" x="315.5" y="513" width="16" height="16"/>
@@ -149,7 +145,7 @@
   <object id="20" name="enemy" type="enemy" x="207.5" y="767.5" width="16" height="16"/>
   <object id="21" name="enemy" type="enemy" x="432.5" y="766.5" width="16" height="16"/>
   <object id="22" name="enemy" type="enemy" x="64" y="912.5" width="16" height="16"/>
-  <object id="23" name="enemy" type="enemy" x="95" y="929" width="16" height="16"/>
+  <object id="23" name="enemy" type="enemy" x="431.667" y="922.333" width="16" height="16"/>
   <object id="25" name="enemy" type="enemy" x="312.667" y="757.333" width="16" height="16"/>
   <object id="26" name="enemy" type="enemy" x="354.667" y="762" width="16" height="16"/>
   <object id="27" name="enemy" type="enemy" x="392" y="760.667" width="16" height="16"/>
@@ -157,6 +153,9 @@
   <object id="29" name="enemy" type="enemy" x="492" y="780" width="16" height="16"/>
   <object id="30" name="enemy" type="enemy" x="464" y="768" width="16" height="16"/>
   <object id="31" name="enemy" type="enemy" x="512" y="755.333" width="16" height="16"/>
+  <object id="33" name="player" type="player" x="547.333" y="928" width="16" height="16"/>
+  <object id="34" name="exit" type="exit" x="625" y="912" width="14" height="48"/>
+  <object id="35" name="enemy" type="enemy" x="97.3333" y="928" width="16" height="16"/>
  </objectgroup>
  <layer name="buildings" width="40" height="60">
   <properties>

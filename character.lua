@@ -8,7 +8,12 @@ local assetSoundsFolder = 'assets/sounds/'
 local badAssets = {
     { sprite = 'fantome.png', hitSound = 'fantome.wav', deathSound = 'pain6.wav' },
     { sprite = 'scarabee.png', hitSound = 'Chipster.wav', deathSound = '8.ogg' },
-    { sprite = 'souris.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' }
+    { sprite = 'souris.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
+    { sprite = 'pumkin.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
+    { sprite = 'bat.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
+    { sprite = 'skeleton.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
+    { sprite = 'pumkin.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
+    { sprite = 'troll.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' }
 }
 
 
@@ -18,9 +23,9 @@ function Character:new(x, y, sprite)
     local chosen = math.random(#badAssets)
     self.x = x
     self.y = y
-    self.sprite = love.graphics.newImage(sprite or assetSpritesFolder .. '/' .. badAssets[chosen].sprite)
-    self.hitSound = assetSoundsFolder .. '/' .. badAssets[chosen].hitSound
-    self.deathSound = assetSoundsFolder .. '/' .. badAssets[chosen].deathSound
+    self.sprite = love.graphics.newImage(sprite or assetSpritesFolder  .. badAssets[chosen].sprite)
+    self.hitSound = assetSoundsFolder .. badAssets[chosen].hitSound
+    self.deathSound = assetSoundsFolder .. badAssets[chosen].deathSound
 end
 
 -- draw the Character 
