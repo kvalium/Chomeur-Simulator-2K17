@@ -5,6 +5,7 @@ is made with LOVE game engine
 * [Simple Tiled Implementation](https://github.com/karai17/Simple-Tiled-Implementation)
 * [Anim8](https://github.com/kikito/anim8)
 * [Classic] (https://github.com/rxi/classic/)
+* [Knife System] (https://github.com/airstruck/knife/blob/master/readme/system.md)
 
 ## Useful related readings
 
@@ -13,7 +14,7 @@ is made with LOVE game engine
 
 ## Assets sources
 * [Character](http://opengameart.org/content/classic-hero-and-baddies-pack)
-* [Theme, decoration](http://opengameart.org/content/roguelike-modern-city-pack)
+* awesome [Roguelike Modern City Pack](http://opengameart.org/content/roguelike-modern-city-pack) from Kenney.nl
 
-Credits
-http://opengameart.org/content/wgs-music-41-vs-tom-3-loops
+# Credits
+
