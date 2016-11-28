@@ -37,9 +37,9 @@ end
 function printHud(player, nb_pages)
     love.graphics.setColor(0, 100, 100, 200)
     love.graphics.rectangle('fill', player.x - 300, player.y + 130, 1000, 1000)
-    love.graphics.setColor(0, 0, 0, 255)
+    love.graphics.setColor(0, 200, 200, 255)
 
-    love.graphics.print("Dossier pôle emplois :" .. nb_pages, player.x - 190, player.y + 135)
+    love.graphics.print("Dossier pôle emploi :" .. nb_pages .. "pages", player.x - 190, player.y + 135)
     love.graphics.print('Lives ' .. player.lives, player.x + 120, player.y + 135)
 
     love.graphics.setColor(255, 255, 255, 255)

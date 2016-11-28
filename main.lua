@@ -16,6 +16,7 @@ local image, spriteLayer, player, exit, sound
 -- Enabling debug mode
 local debug = false
 
+local reload = false
 
 function table.removekey(table, key)
     local element = table[key]
@@ -27,7 +28,7 @@ end
 -- This function checks collision between a bullet and an entity --
 -------------------------------------------------------------------
 local checkIfCollide = System({ 'name' },
-    function(name, bullet)
+    function(name, bullet,bullets_tab,i)
         if spriteLayer.sprites[name] then
             local badGuy = spriteLayer.sprites[name]
             if not badGuy.body:isDestroyed() then
@@ -41,6 +42,7 @@ local checkIfCollide = System({ 'name' },
                     -- remove layer then destroy body
                     table.removekey(spriteLayer.sprites, name)
                     badGuy.body:destroy()
+                    table.removekey(bullets_tab,i)
                 end
             end
         end
@@ -72,7 +74,7 @@ local updateMotion = System({ 'name', 'vel' },
 
 -- gestion des shoots
 local bullets = {}
-local nb_pages = 100
+local nb_pages = 10
 
 local direction_player = 1;
 -- game state
@@ -107,6 +109,8 @@ function love.draw()
         gameOverDraw()
     elseif state == 'gamewin' then
         gameWinDraw()
+    elseif state == 'morepage' then
+        gameMorePageDraw()
     else
         -- Scale world
         local scale = 2
@@ -127,6 +131,8 @@ function love.draw()
         -- draw bullets:
         love.graphics.setColor(255, 255, 255, 224)
 
+        
+        
         local i, o
         for i, o in pairs(bullets) do
             love.graphics.circle('fill', o.x, o.y, 5, 4)
@@ -148,6 +154,9 @@ function love.keyreleased(key, unicode)
             table.insert(bullets, prjt:draw())
             nb_pages = nb_pages - 1
         end
+    end
+    if key == 'r' then
+        reload = false
     end
 end
 
@@ -294,24 +303,31 @@ function levelUpdate(dt)
 
     local x, y = 0, 0
     local speed = 48
-
-    if down("z", "up") and player.y > 8 then
-        y = y - speed
-        direction_player = 4
+    if reload == false then
+      if down("z", "up") and player.y > 8 then
+          y = y - speed
+          direction_player = 4
+      end
+      if down("s", "down") then
+          y = y + speed
+          direction_player = 2
+      end
+      if down("q", "left") and player.x > 8 then
+          x = x - speed
+          direction_player = 3
+      end
+      if down("d", "right") then
+          x = x + speed
+          direction_player = 1
+      end
     end
-    if down("s", "down") then
-        y = y + speed
-        direction_player = 2
+    if down("r") then
+      reload=true
+      if nb_pages <10 then
+        love.timer.sleep(1)
+        nb_pages = nb_pages+1
+      end
     end
-    if down("q", "left") and player.x > 8 then
-        x = x - speed
-        direction_player = 3
-    end
-    if down("d", "right") then
-        x = x + speed
-        direction_player = 1
-    end
-
     player.body:applyForce(x, y)
     player.x = player.body:getX() - 8
     player.y = player.body:getY() - 8
@@ -328,12 +344,12 @@ function levelUpdate(dt)
         elseif o.dir == 4 then
             o.y = o.y - o.speed * dt
         end
-        if (o.x < -10) or (o.x > love.graphics.getWidth() + 10)
-                or (o.y < -10) or (o.y > love.graphics.getHeight() + 10) then
+        if (o.x < -10) or (o.x > player.x + 300)
+                or (o.y < -10) or (o.y > player.y + 300) then
             table.remove(bullets, i)
         end
         for _, entity in ipairs(entities) do
-            checkIfCollide(entity, o)
+          checkIfCollide(entity, o,bullets,i)
         end
     end
     -- updates routines
@@ -373,6 +389,11 @@ function gameWinDraw()
     love.graphics.print("Appuyez sur l'échap bouton pour recommencer et faire encore mieux !", 200, 200)
 end
 
+function gameMorePageDraw()
+    love.graphics.setColor(0, 255, 255, 255)
+    love.graphics.print('Votre dossier est incomplet!', 100, 100)
+end
+
 -- ***********************
 -- COLISSION DETECTION
 -- ***********************
@@ -384,7 +405,12 @@ function beginContact(a, b, coll)
             if currentLevel < #levels then
                 currentLevel = currentLevel + 1
             else
+                if nb_pages > 95 then
                 state = "gamewin"
+              else
+                state = "morepage"
+              end
+              
             end
         else
             -- play ennemy sound
