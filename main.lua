@@ -143,16 +143,16 @@ function love.draw()
         end
 
         -- "HUD"
-        printHud(player, nb_pages)
+        printHud(player, nbPages)
     end
 end
 
 function love.keyreleased(key, unicode)
     if key == 'space' then
-        if nb_pages > 0 then
+        if nbPages > 0 then
             prjt = Projectile(player.x + 10, player.y, 100, direction_player, "assets/images/paper.png")
             table.insert(bullets, prjt:draw())
-            nb_pages = nb_pages - 1
+            nbPages = nbPages - 1
         end
     end
     if key == 'r' then
@@ -226,11 +226,10 @@ function gameLoadLevel(level)
     map:box2d_init(world)
     world:setCallbacks(beginContact)
 
-    -- Create a Custom Layer
+    -- Create a Custom Layerdddddd
     map:addCustomLayer("Sprite Layer", 4)
 
     -- Add data to Custom Layer
-    image = love.graphics.newImage("assets/images/sprite.png")
     spriteLayer = map.layers["Sprite Layer"]
 
     -- appending player
@@ -282,8 +281,7 @@ function gameLoadLevel(level)
     end
 
     -- removes maps object layers
-    map:removeLayer('spawnPoint')
-    map:removeLayer('enemies')
+    map:removeLayer('objects')
 
     -- welcome sound
     local welcomeSound = love.audio.newSource("assets/sounds/Lets_go.wav", "static")
@@ -344,8 +342,9 @@ function levelUpdate(dt)
         elseif o.dir == 4 then
             o.y = o.y - o.speed * dt
         end
-        if (o.x < -10) or (o.x > player.x + 300)
-                or (o.y < -10) or (o.y > player.y + 300) then
+        local paperDistance = 50
+        if (o.x < player.x - paperDistance) or (o.x > player.x + paperDistance)
+                or (o.y < player.y - paperDistance) or (o.y > player.y + paperDistance) then
             table.remove(bullets, i)
         end
         for _, entity in ipairs(entities) do
@@ -395,15 +394,18 @@ function gameMorePageDraw()
 end
 
 -- ***********************
--- COLISSION DETECTION
+-- COLISION DETECTION
 -- ***********************
 function beginContact(a, b, coll)
     x, y = coll:getNormal()
+    local idA = a:getUserData()
+    local idB = b:getUserData()
     -- if something collide with the players
-    if a:getUserData() == 'Player' then
-        if b:getUserData() == 'Exit' then
+    if idA == 'Player' or idB == 'Player' then
+        if idA == 'Exit' or idB == 'Exit' then
             if currentLevel < #levels then
                 currentLevel = currentLevel + 1
+                gameLoadLevel(currentLevel)
             else
                 if nb_pages > 95 then
                 state = "gamewin"
@@ -414,12 +416,20 @@ function beginContact(a, b, coll)
             end
         else
             -- play ennemy sound
-            local ennemy = spriteLayer.sprites[b:getUserData()]
-            local ennemySound = love.audio.newSource(ennemy.hitSound, 'static')
-            ennemySound:play()
-            player.lives = player.lives - 1
-            if player.lives == 0 then
-                state = "gameover"
+            local enemy = nil
+            if spriteLayer.sprites[idA] then 
+              enemy = spriteLayer.sprites[idA] 
+            elseif spriteLayer.sprites[idB] then
+              enemy = spriteLayer.sprites[idB]
+            end
+            if enemy then
+              local enemySound = love.audio.newSource(enemy.hitSound, 'static')
+              enemySound:play()
+              playerLives = playerLives - 1
+              player.lives = playerLives
+              if player.lives == 0 then
+                  state = "gameover"
+              end
             end
         end
     end
