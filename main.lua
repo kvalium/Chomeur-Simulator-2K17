@@ -14,7 +14,7 @@ local System = require 'lib.knife.system'
 local image, spriteLayer, player, exit, sound
 
 -- Enabling debug mode
-local debug = false
+local debug = true
 
 local reload = false
 
@@ -86,6 +86,7 @@ local playerLives = 10
 
 
 function love.load()
+    love.window.setTitle('Chômeur Simulator 2K17')
     introLoad()
 end
 
@@ -168,7 +169,7 @@ end
 -- INTRO FUNCTIONS
 -- ***********************
 
-local splashScreen, splashTitle, splashCommand, howTo, death, winner
+local splashScreen, splashTitle, splashCommand, howTo, death, winner, pushJ
 local splashTransX = 0
 local splashTransY = 0
 local splashTransSpeed = 0.1
@@ -182,6 +183,7 @@ function introLoad()
     howTo = love.graphics.newImage("assets/images/howto.png")
     death = love.graphics.newImage("assets/images/death.png")
     winner = love.graphics.newImage("assets/images/winner.png")
+    pushJ = love.graphics.newImage("assets/images/pushJ.png")
     splashMusic:play()
     splashMusic:setVolume(0.7)
 end
@@ -197,7 +199,6 @@ function introUpdate(dt)
 
     if down("space") then
         love.audio.stop(splashMusic)
-        --gameLoadLevel(currentLevel)
         state = "howto"
     end
 end
@@ -214,7 +215,8 @@ end
 -- HOWTO FUNCTIONS
 -- ***********************
 function howToDraw()
-    love.graphics.draw(howTo, 100, 0, 0, 1, 1)
+    love.graphics.draw(howTo, 50, 0, 0, 1, 1)
+    love.graphics.draw(pushJ, 550, 500, 0, 0.5, 0.5)
 end
 
 function howToUpdate(dt)
@@ -229,6 +231,7 @@ end
 -- ***********************
 -- GAME FUNCTIONS
 -- ***********************
+local gameMusic = love.audio.newSource("assets/sounds/ZombiesAreComing.ogg")
 
 -- Level loader handler
 function gameLoadLevel(level)
@@ -307,6 +310,9 @@ function gameLoadLevel(level)
     -- welcome sound
     local welcomeSound = love.audio.newSource("assets/sounds/Lets_go.wav", "static")
     welcomeSound:play()
+    
+    gameMusic:play()
+    gameMusic:setVolume(0.5)
 end
 
 
@@ -327,7 +333,7 @@ function levelUpdate(dt)
             y = y - speed
             direction_player = 4
         end
-        if down("s", "down") then
+        if down("s", "down") and player.y < 940 then
             y = y + speed
             direction_player = 2
         end
@@ -335,7 +341,7 @@ function levelUpdate(dt)
             x = x - speed
             direction_player = 3
         end
-        if down("d", "right") then
+        if down("d", "right") and player.x < 620 then
             x = x + speed
             direction_player = 1
         end
@@ -375,6 +381,12 @@ function levelUpdate(dt)
     -- updates routines
     map:update(dt)
     world:update(dt)
+    
+    -- splash music loop
+    if gameMusic:isStopped() then
+        gameMusic:play()
+    end
+    
 end
 
 -- ***********************
