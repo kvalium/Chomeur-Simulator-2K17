@@ -1,3 +1,5 @@
+local reloadColor = true
+local timer = 0
 --
 -- Prints debug information on objects
 --
@@ -35,13 +37,25 @@ end
 -- Prints player's HUD
 --
 function printHud(player, nb_pages)
+    love.graphics.print("Espace = Tirer      R = Recharger", player.x - 190, player.y - 135)
+    
     love.graphics.setColor(0, 100, 100, 200)
     love.graphics.rectangle('fill', player.x - 300, player.y + 130, 1000, 1000)
     love.graphics.setColor(0, 200, 200, 255)
 
     love.graphics.print("Dossier pôle emploi :" .. nb_pages .. "pages", player.x - 190, player.y + 135)
     love.graphics.print('Lives ' .. player.lives, player.x + 120, player.y + 135)
+    
+    love.graphics.setColor(0, 255, 255, 255)
+    if nb_pages == 0 then
+      if reloadColor then love.graphics.setColor(255, 0, 0, 255) end
+      timer = timer + 1
+        if timer == 10 then
+        reloadColor = not reloadColor
+        timer = 0
+      end
+      love.graphics.print('RECHARGE!!', player.x - 32, player.y + 16)
+    end
 
     love.graphics.setColor(255, 255, 255, 255)
 end
-

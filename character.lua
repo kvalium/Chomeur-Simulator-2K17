@@ -6,14 +6,14 @@ local assetSpritesFolder = 'assets/images/'
 local assetSoundsFolder = 'assets/sounds/'
 
 local badAssets = {
-    { sprite = 'fantome.png', hitSound = 'fantome.wav', deathSound = 'pain6.wav' },
+    { sprite = 'fantome.png', hitSound = 'fantome.wav', deathSound = '8.ogg' },
     { sprite = 'scarabee.png', hitSound = 'Chipster.wav', deathSound = '8.ogg' },
-    { sprite = 'souris.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
-    { sprite = 'pumkin.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
-    { sprite = 'bat.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
-    { sprite = 'skeleton.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
-    { sprite = 'pumkin.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' },
-    { sprite = 'troll.png', hitSound = 'picopico.wav', deathSound = 'pain6.wav' }
+    { sprite = 'souris.png', hitSound = 'pain6.wav', deathSound = 'pain6.wav' },
+    { sprite = 'pumkin.png', hitSound = 'boom5.wav', deathSound = 'boom5.wav' },
+    { sprite = 'bat.png', hitSound = 'picopico.wav', deathSound = 'zombie-9.wav' },
+    { sprite = 'skeleton.png', hitSound = 'picopico.wav', deathSound = 'wscream_2.wav' },
+    { sprite = 'pumkin.png', hitSound = 'ouuu.wav', deathSound = 'pain6.wav' },
+    { sprite = 'troll.png', hitSound = 'picopico.wav', deathSound = 'boom5.wav' }
 }
 
 
