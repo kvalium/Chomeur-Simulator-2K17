@@ -14,7 +14,7 @@ local System = require 'lib.knife.system'
 local image, spriteLayer, player, exit, sound
 
 -- Enabling debug mode
-local debug = false
+local debug = true
 
 local reload = false
 
@@ -333,7 +333,7 @@ function levelUpdate(dt)
             y = y - speed
             direction_player = 4
         end
-        if down("s", "down") then
+        if down("s", "down") and player.y < 940 then
             y = y + speed
             direction_player = 2
         end
@@ -341,7 +341,7 @@ function levelUpdate(dt)
             x = x - speed
             direction_player = 3
         end
-        if down("d", "right") then
+        if down("d", "right") and player.x < 620 then
             x = x + speed
             direction_player = 1
         end
