@@ -74,7 +74,7 @@ local updateMotion = System({ 'name', 'vel' },
 
 -- gestion des shoots
 local bullets = {}
-local nbPages = 10
+local nbPages = 50
 
 local direction_player = 1;
 -- game state
@@ -430,7 +430,7 @@ function beginContact(a, b, coll)
                 currentLevel = currentLevel + 1
                 gameLoadLevel(currentLevel)
             else
-                if nbPages > 95 then
+                if nbPages > 35 then
                     state = "gamewin"
                 else
                     state = "morepage"
