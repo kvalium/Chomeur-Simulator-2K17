@@ -28,7 +28,7 @@ end
 -- This function checks collision between a bullet and an entity --
 -------------------------------------------------------------------
 local checkIfCollide = System({ 'name' },
-    function(name, bullet,bullets_tab,i)
+    function(name, bullet, bullets_tab, i)
         if spriteLayer.sprites[name] then
             local badGuy = spriteLayer.sprites[name]
             if not badGuy.body:isDestroyed() then
@@ -42,7 +42,7 @@ local checkIfCollide = System({ 'name' },
                     -- remove layer then destroy body
                     table.removekey(spriteLayer.sprites, name)
                     badGuy.body:destroy()
-                    table.removekey(bullets_tab,i)
+                    table.removekey(bullets_tab, i)
                 end
             end
         end
@@ -74,7 +74,7 @@ local updateMotion = System({ 'name', 'vel' },
 
 -- gestion des shoots
 local bullets = {}
-local nb_pages = 10
+local nbPages = 10
 
 local direction_player = 1;
 -- game state
@@ -92,6 +92,8 @@ end
 function love.update(dt)
     if state == 'intro' then
         introUpdate(dt)
+    elseif state == 'howto' then
+        howToUpdate(dt)
     elseif state == 'gameover' then
         gameOverUpdate(dt)
     elseif state == 'gamewin' then
@@ -105,6 +107,8 @@ end
 function love.draw()
     if state == 'intro' then
         introDraw()
+    elseif state == 'howto' then
+        howToDraw(dt)
     elseif state == 'gameover' then
         gameOverDraw()
     elseif state == 'gamewin' then
@@ -131,8 +135,6 @@ function love.draw()
         -- draw bullets:
         love.graphics.setColor(255, 255, 255, 224)
 
-        
-        
         local i, o
         for i, o in pairs(bullets) do
             love.graphics.circle('fill', o.x, o.y, 5, 4)
@@ -148,7 +150,7 @@ function love.draw()
 end
 
 function love.keyreleased(key, unicode)
-    if key == 'space' then
+    if (key == 'space' or key == 'j') and player then
         if nbPages > 0 then
             prjt = Projectile(player.x + 10, player.y, 100, direction_player, "assets/images/paper.png")
             table.insert(bullets, prjt:draw())
@@ -166,7 +168,7 @@ end
 -- INTRO FUNCTIONS
 -- ***********************
 
-local splashScreen, splashTitle, splashCommand
+local splashScreen, splashTitle, splashCommand, howTo, death, winner
 local splashTransX = 0
 local splashTransY = 0
 local splashTransSpeed = 0.1
@@ -177,6 +179,9 @@ function introLoad()
     splashScreen = love.graphics.newImage("assets/images/splashScreen.png")
     splashTitle = love.graphics.newImage("assets/images/splashTitle.png")
     splashCommand = love.graphics.newImage("assets/images/splashCommand.png")
+    howTo = love.graphics.newImage("assets/images/howto.png")
+    death = love.graphics.newImage("assets/images/death.png")
+    winner = love.graphics.newImage("assets/images/winner.png")
     splashMusic:play()
     splashMusic:setVolume(0.7)
 end
@@ -192,8 +197,8 @@ function introUpdate(dt)
 
     if down("space") then
         love.audio.stop(splashMusic)
-        gameLoadLevel(currentLevel)
-        state = "game"
+        --gameLoadLevel(currentLevel)
+        state = "howto"
     end
 end
 
@@ -203,6 +208,22 @@ function introDraw()
     love.graphics.draw(splashCommand, 400, 550, 0, 0.5, 0.5)
     splashTransX = splashTransX - splashTransSpeed
     splashTransY = splashTransY - splashTransSpeed / 5
+end
+
+-- ***********************
+-- HOWTO FUNCTIONS
+-- ***********************
+function howToDraw()
+    love.graphics.draw(howTo, 100, 0, 0, 1, 1)
+end
+
+function howToUpdate(dt)
+    
+    local down = love.keyboard.isDown
+    if down("j") then
+        gameLoadLevel(currentLevel)
+        state = "game"
+    end
 end
 
 -- ***********************
@@ -302,29 +323,29 @@ function levelUpdate(dt)
     local x, y = 0, 0
     local speed = 48
     if reload == false then
-      if down("z", "up") and player.y > 8 then
-          y = y - speed
-          direction_player = 4
-      end
-      if down("s", "down") then
-          y = y + speed
-          direction_player = 2
-      end
-      if down("q", "left") and player.x > 8 then
-          x = x - speed
-          direction_player = 3
-      end
-      if down("d", "right") then
-          x = x + speed
-          direction_player = 1
-      end
+        if down("z", "up") and player.y > 8 then
+            y = y - speed
+            direction_player = 4
+        end
+        if down("s", "down") then
+            y = y + speed
+            direction_player = 2
+        end
+        if down("q", "left") and player.x > 8 then
+            x = x - speed
+            direction_player = 3
+        end
+        if down("d", "right") then
+            x = x + speed
+            direction_player = 1
+        end
     end
     if down("r") then
-      reload=true
-      if nb_pages <10 then
-        love.timer.sleep(1)
-        nb_pages = nb_pages+1
-      end
+        reload = true
+        if nbPages < 10 then
+            love.timer.sleep(1)
+            nbPages = nbPages + 1
+        end
     end
     player.body:applyForce(x, y)
     player.x = player.body:getX() - 8
@@ -348,7 +369,7 @@ function levelUpdate(dt)
             table.remove(bullets, i)
         end
         for _, entity in ipairs(entities) do
-          checkIfCollide(entity, o,bullets,i)
+            checkIfCollide(entity, o, bullets, i)
         end
     end
     -- updates routines
@@ -368,6 +389,7 @@ function gameOverUpdate(dt)
 end
 
 function gameOverDraw()
+    love.graphics.draw(death,400, 300, 0, 1, 1)
     love.graphics.print('YOU DIED!', 100, 100)
     love.graphics.print("Appuyez sur l'échap bouton pour recommencer", 200, 200)
 end
@@ -384,6 +406,7 @@ function gameWinUpdate(dt)
 end
 
 function gameWinDraw()
+    love.graphics.draw(winner,400, 300, 0, 1, 1)
     love.graphics.print('YOU ARE WINNER!', 100, 100)
     love.graphics.print("Appuyez sur l'échap bouton pour recommencer et faire encore mieux !", 200, 200)
 end
@@ -407,29 +430,28 @@ function beginContact(a, b, coll)
                 currentLevel = currentLevel + 1
                 gameLoadLevel(currentLevel)
             else
-                if nb_pages > 95 then
-                state = "gamewin"
-              else
-                state = "morepage"
-              end
-              
+                if nbPages > 95 then
+                    state = "gamewin"
+                else
+                    state = "morepage"
+                end
             end
         else
             -- play ennemy sound
             local enemy = nil
-            if spriteLayer.sprites[idA] then 
-              enemy = spriteLayer.sprites[idA] 
+            if spriteLayer.sprites[idA] then
+                enemy = spriteLayer.sprites[idA]
             elseif spriteLayer.sprites[idB] then
-              enemy = spriteLayer.sprites[idB]
+                enemy = spriteLayer.sprites[idB]
             end
             if enemy then
-              local enemySound = love.audio.newSource(enemy.hitSound, 'static')
-              enemySound:play()
-              playerLives = playerLives - 1
-              player.lives = playerLives
-              if player.lives == 0 then
-                  state = "gameover"
-              end
+                local enemySound = love.audio.newSource(enemy.hitSound, 'static')
+                enemySound:play()
+                playerLives = playerLives - 1
+                player.lives = playerLives
+                if player.lives == 0 then
+                    state = "gameover"
+                end
             end
         end
     end
