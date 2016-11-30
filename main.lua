@@ -74,7 +74,7 @@ local updateMotion = System({ 'name', 'vel' },
 
 -- gestion des shoots
 local bullets = {}
-local nbPages = 10
+local nbPages = 50
 
 local direction_player = 1;
 -- game state
@@ -99,6 +99,8 @@ function love.update(dt)
         gameOverUpdate(dt)
     elseif state == 'gamewin' then
         gameWinUpdate(dt)
+    elseif state == 'morepage' then
+        gameOverUpdate(dt)
     else
         levelUpdate(dt)
     end
@@ -153,7 +155,7 @@ end
 function love.keyreleased(key, unicode)
     if (key == 'space' or key == 'j') and player then
         if nbPages > 0 then
-            prjt = Projectile(player.x + 10, player.y, 100, direction_player, "assets/images/paper.png")
+            prjt = Projectile(player.x + 10, player.y+10, 100, direction_player, "assets/images/paper.png")
             table.insert(bullets, prjt:draw())
             nbPages = nbPages - 1
         end
@@ -348,7 +350,7 @@ function levelUpdate(dt)
     end
     if down("r") then
         reload = true
-        if nbPages < 35 then
+        if nbPages < 50 then
             love.timer.sleep(1)
             nbPages = nbPages + 1
         end
@@ -426,6 +428,7 @@ end
 function gameMorePageDraw()
     love.graphics.setColor(0, 255, 255, 255)
     love.graphics.print('Votre dossier est incomplet!', 100, 100)
+    love.graphics.print("appuyez sur sur le bouton de l'échap pour essayer d'être un meilleur chômeur !", 200, 200)
 end
 
 -- ***********************
@@ -438,16 +441,16 @@ function beginContact(a, b, coll)
     -- if something collide with the players
     if idA == 'Player' or idB == 'Player' then
         if idA == 'Exit' or idB == 'Exit' then
-            if currentLevel < #levels then
-                currentLevel = currentLevel + 1
-                gameLoadLevel(currentLevel)
+            if nbPages > 35 then
+              state = "gamewin"
+              if currentLevel < #levels then
+                  currentLevel = currentLevel + 1
+                  gameLoadLevel(currentLevel)
+              end
             else
-                if nbPages == 35 then
-                    state = "gamewin"
-                else
-                    state = "morepage"
-                end
+              state = "morepage"
             end
+
         else
             -- play ennemy sound
             local enemy = nil
