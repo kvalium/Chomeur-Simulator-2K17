@@ -74,7 +74,7 @@ local updateMotion = System({ 'name', 'vel' },
 
 -- gestion des shoots
 local bullets = {}
-local nbPages = 50
+local nbPages = 20
 
 local direction_player = 1;
 -- game state
@@ -441,14 +441,15 @@ function beginContact(a, b, coll)
     -- if something collide with the players
     if idA == 'Player' or idB == 'Player' then
         if idA == 'Exit' or idB == 'Exit' then
-            if nbPages > 35 then
-              state = "gamewin"
-              if currentLevel < #levels then
-                  currentLevel = currentLevel + 1
-                  gameLoadLevel(currentLevel)
-              end
+            if currentLevel < #levels then
+                currentLevel = currentLevel + 1
+                gameLoadLevel(currentLevel)
             else
-              state = "morepage"
+                if nbPages > 35 then
+                    state = "gamewin"
+                else
+                    state = "morepage"
+                end
             end
 
         else
