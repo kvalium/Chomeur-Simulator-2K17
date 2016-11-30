@@ -14,7 +14,7 @@ local System = require 'lib.knife.system'
 local image, spriteLayer, player, exit, sound
 
 -- Enabling debug mode
-local debug = true
+local debug = false
 
 local reload = false
 
@@ -348,7 +348,7 @@ function levelUpdate(dt)
     end
     if down("r") then
         reload = true
-        if nbPages < 10 then
+        if nbPages < 35 then
             love.timer.sleep(1)
             nbPages = nbPages + 1
         end
