@@ -1,5 +1,5 @@
 # Chomeur Simulator 2017
-is made with LOVE game engine
+is made with LOVE game engine for the [Make Something Horrible 2016](https://itch.io/jam/make-something-horrible-2016) GameJam
 
 ## LOVE libs
 * [Simple Tiled Implementation](https://github.com/karai17/Simple-Tiled-Implementation)
