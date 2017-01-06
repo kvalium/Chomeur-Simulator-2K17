@@ -13,8 +13,7 @@ is made with LOVE game engine for the [Make Something Horrible 2016](https://itc
 * [Tiled Map Editor tutorial](https://gamedevelopment.tutsplus.com/tutorials/introduction-to-tiled-map-editor-a-platform-agnostic-tool-for-level-maps--gamedev-2838)
 
 ## Assets sources
-* [Character](http://opengameart.org/content/classic-hero-and-baddies-pack)
 * awesome [Roguelike Modern City Pack](http://opengameart.org/content/roguelike-modern-city-pack) from Kenney.nl
 
 # Credits
-
+* Kenney.nl
